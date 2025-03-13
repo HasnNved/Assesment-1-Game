@@ -1,0 +1,158 @@
+using System;
+using System.Collections.Generic;
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Game game = new Game();
+        game.StartGame();
+    }
+}
+
+class Game
+{
+    private Player _player;
+    private Room _currentRoom;
+
+    public Game()
+    {
+        _player = new Player("Dungeon Master", 100);
+        _currentRoom = new Room("You are in dark room, damp dungeon.");
+        Room room2 = new Room("A bright room, room with a wooden chest.");
+        _currentRoom.SetNextRoom(room2);
+    }
+
+    public void StartGame()
+    {
+        Console.WriteLine("Welcome to Dungeon Game!");
+        DisplayRoomDescription();
+
+        while (true)
+        {
+            Console.WriteLine("\nWhat would you like to do?");
+            Console.WriteLine("1. View room details");
+            Console.WriteLine("2. View player status");
+            Console.WriteLine("3. Pick an item");
+            Console.WriteLine("4. Move to next room");
+            Console.WriteLine("5. Quit the game");
+
+            string choice = Console.ReadLine();
+
+            switch (choice)
+            {
+                case "1":
+                    DisplayRoomDescription();
+                    break;
+                case "2":
+                    _player.DisplayStatus();
+                    break;
+                case "3":
+                    PickUpItem();
+                    break;
+                case "4":
+                    MoveToNextRoom();
+                    break;
+                case "5":
+                    Console.WriteLine("Thanks for playing the Game!");
+                    return;
+                default:
+                    Console.WriteLine("Invalid option.Select Correct Option.");
+                    break;
+            }
+        }
+    }
+
+    private void DisplayRoomDescription()
+    {
+        _currentRoom.GetDescription();
+    }
+
+    private void PickUpItem()
+    {
+        if (_currentRoom.HasItem())
+        {
+            string item = _currentRoom.GetItem();
+            _player.PickUpItem(item);
+            Console.WriteLine($"You picked up a {item}.");
+        }
+        else
+        {
+            Console.WriteLine("No items to pick up in this room.");
+        }
+    }
+
+    private void MoveToNextRoom()
+    {
+        if (_currentRoom.NextRoom != null)
+        {
+            _currentRoom = _currentRoom.NextRoom;
+            Console.WriteLine("Moving to the next room...");
+            DisplayRoomDescription();
+        }
+        else
+        {
+            Console.WriteLine("There is no next room. You are stuck!");
+        }
+    }
+}
+
+class Player
+{
+    public string Name { get; private set; }
+    public int Health { get; private set; }
+    public List<string> Inventory { get; private set; }
+
+    public Player(string name, int health)
+    {
+        Name = name;
+        Health = health;
+        Inventory = new List<string>();
+    }
+
+    public void DisplayStatus()
+    {
+        Console.WriteLine($"Player: {Name}, Health: {Health}");
+        Console.WriteLine("Inventory: " + (Inventory.Count == 0 ? "Empty" : string.Join(", ", Inventory)));
+    }
+
+    public void PickUpItem(string item)
+    {
+        Inventory.Add(item);
+    }
+}
+
+class Room
+{
+    public string Description { get; private set; }
+    public Room NextRoom { get; private set; }
+    private string _item;
+
+    public Room(string description)
+    {
+        Description = description;
+        _item = "Magic Sword";  // Default item for the first room
+    }
+
+    public void SetNextRoom(Room nextRoom)
+    {
+        NextRoom = nextRoom;
+    }
+
+    public void GetDescription()
+    {
+        Console.WriteLine($"Room Description: {Description}");
+    }
+
+    public bool HasItem()
+    {
+        return !string.IsNullOrEmpty(_item);
+    }
+
+    public string GetItem()
+    {
+        string item = _item;
+        _item = null;  // Item is removed after being picked up
+        return item;
+    }
+}
